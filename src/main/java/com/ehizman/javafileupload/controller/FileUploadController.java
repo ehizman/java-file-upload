@@ -1,6 +1,5 @@
 package com.ehizman.javafileupload.controller;
 
-import com.ehizman.javafileupload.controller.responses.APIResponse;
 import com.ehizman.javafileupload.exceptions.StorageException;
 import com.ehizman.javafileupload.services.FileStoreService;
 import lombok.AllArgsConstructor;
@@ -21,10 +20,9 @@ public class FileUploadController {
     @PostMapping("/upload")
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file){
         try {
-            return new ResponseEntity<>(new APIResponse(fileStoreService.storeFile(file), true, 200)
-                    , HttpStatus.OK);
+            return new ResponseEntity<>(fileStoreService.storeFile(file), HttpStatus.OK);
         } catch (StorageException e) {
-            return new ResponseEntity<>(new APIResponse(e.getMessage(), false, 400), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 }
