@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -69,6 +70,19 @@ public class FileStoreServiceImpl  implements FileStoreService{
             }
         } catch (MalformedURLException e) {
             throw new StorageException("Error: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Stream<Path> loadAll() throws StorageException {
+        //load all files
+        try {
+            return Files.walk(this.rootLocation, 1)
+                    .filter(path -> !path.equals(rootLocation))
+                    .map(rootLocation::relativize);
+        } catch (IOException e) {
+            log.info("Exception occured --> {}", e.getMessage());
+            throw new StorageException(String.format("Failed to read directory due to nested exception %s", e.getMessage()));
         }
     }
 

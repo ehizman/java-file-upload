@@ -12,6 +12,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -65,5 +69,30 @@ class FileStoreServiceImplTest {
         }
         assertThatThrownBy(()-> fileStoreService.load("test.pdf"))
                 .isInstanceOf(StorageException.class).hasMessage("Could not find the file!");
+    }
+
+    @Test
+    void testThatCanLoadAllFilesInRootDirectory() throws IOException, StorageException {
+        //files are loaded from the "uploaded_files" directory in the project root folder
+        // check if the "uploaded_files" directory exists, if it exists, then delete it
+        File directory = new File(".//uploaded_files");
+        if (!directory.exists()){
+            directory.mkdirs();
+        }
+        // create the first file in the "uploaded_files" directory
+        File fileOne = new File(".//uploaded_files/fileOne.txt");
+        fileOne.createNewFile();
+
+        // create the second file in the "uploaded_files" directory
+        File fileTwo = new File(".//uploaded_files/fileTwo.txt");
+        fileTwo.createNewFile();
+
+        Stream<Path> returnedPaths = fileStoreService.loadAll();
+        assertThat(returnedPaths).contains(
+              Paths.get("fileOne.txt"),
+              Paths.get("fileTwo.txt")
+        );
+        //delete the directory and its contents after the test method completes
+        FileUtils.deleteDirectory(directory);
     }
 }
